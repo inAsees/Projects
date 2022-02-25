@@ -37,10 +37,10 @@ def guessGame(num):
                 'You are out of total attempts!! Better luck next time.\n Do you want to play again!! For YES/NO press Y/N\n')
             play_again = input().upper()
             if play_again == 'Y':
-                guessGame(10)
+                guessGame(20)
 
         else:
             print(f'Number {comp_choose} found in {attempts} attempts.')
 
 
-guessGame(10)
+guessGame(20)
