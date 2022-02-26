@@ -1,21 +1,24 @@
 # progrem for dice_roll
 #function cretae random numbers 1 to 6
 import random
-def number():
-	num=random.randint(1, 6)
-	return(num)
 
-print("Welcome Dice Game")
-while(True):
-	print ("Do you want roll the dice ?")
-	try:
-		value= int(input("enter 1 for roll dice, 2 for exit"))
-		if (value==1):
-			print(number())
-		elif (value==2):
-			break
-		else:
-			print("wrong input")
-	except:
-		print("Please enter valid inputs")
+
+def roll_Dice():
+    print('Press 1 to roll the dice.\nPress 2 if you want to quit this game.')
+    while True:
+        try:
+            roll = int(input())
+            if roll == 1:
+                print('You got number', random.randint(1, 6))
+            elif roll == 2:
+                print('Game Ended')
+                break
+            else:
+                print('Invalid input! Try again.')
+        except Exception:
+            print('Invalid input! Try again.')
+
+
+roll_Dice()
+
 
