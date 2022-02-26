@@ -2,14 +2,20 @@ import random
 
 
 def roll_Dice():
-    print('Press R to roll the dice.\nPress Q if you want to quit this game.')
+    print('Press 1 to roll the dice.\nPress 2 if you want to quit this game.')
     while True:
-        roll = input().upper()
-        if roll == 'R':
-            print('You got number', random.randint(1, 6))
-        elif roll == 'Q':
-            print('Game Ended')
-            break
+        try:
+            roll = int(input())
+            if roll == 1:
+                print('You got number', random.randint(1, 6))
+            elif roll == 2:
+                print('Game Ended')
+                break
+            else:
+                print('Invalid input! Try again.')
+        except Exception:
+            print('Invalid input! Try again.')
 
 
 roll_Dice()
+
