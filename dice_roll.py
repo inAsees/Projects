@@ -2,10 +2,9 @@ import random
 
 
 class RollDice:
-    def __init__(self, user_input):
-        self._user_input = user_input
+   
 
-    def comp_choose(self):
+    def get_comp_choose(self):
         return random.randint(1, 6)
 
 
@@ -19,9 +18,9 @@ class CliHandler:
             except ValueError:
                 print('Invalid input! Try again.')
                 continue
-            roll_dice_obj = RollDice(user_input)
+            roll_dice = RollDice()
             if user_input == 1:
-                print(f'You got number: {roll_dice_obj.comp_choose()}')
+                print(f'You got number: {roll_dice.comp_choose()}')
             elif user_input == 2:
                 print('Game Ended')
                 break
