@@ -1,5 +1,5 @@
 import pickle
-
+import os
 
 class ContactBook:
     def __init__(self):
@@ -53,34 +53,37 @@ class CliHandler:
     def __init__(self):
         self._contact_book_obj = ContactBook()
 
-    while True:
-        print(
-            'This is your Contact book.\nIf you want to add a contact press "1"\n'
-            'If you want to edit a contact press "2"\nIf you want to delete a contact press "3"\n'
-            'If you want to search for contact press "4"\nIf you want to display your contact list press "5"')
-        try:
-            user_input = int(input('Enter your response:'))
-            if user_input == 1:
-                first_name = input('First name:').capitalize()
-                surname = input('Surname:').capitalize()
-                self._contact_book_obj.
-                contact_number = input('mobile number:')
-                email = input('email:')
-                address = input('address:')
-                self._contact_book_obj.
-                break
-            elif user_input == 2:
-                break
-            elif user_input == 3:
-                break
-            elif user_input == 4:
-                break
-            elif user_input == 5:
-                break
-            else:
+    def start(self):
+        if not 'contact_book.pkl' in os.getcwd():
+            self._contact_book_obj.create_contact_book()
+
+        while True:
+            print(
+                'This is your Contact book.\nIf you want to add a contact press "1"\n'
+                'If you want to edit a contact press "2"\nIf you want to delete a contact press "3"\n'
+                'If you want to search for contact press "4"\nIf you want to display your contact list press "5"')
+            try:
+                user_input = int(input('Enter your response:'))
+                if user_input == 1:
+                    first_name = input('First name:').capitalize()
+                    surname = input('Surname:').capitalize()
+                    self._contact_book_obj.
+                    contact_number = input('mobile number:')
+                    email = input('email:')
+                    address = input('address:')
+                    break
+                elif user_input == 2:
+                    break
+                elif user_input == 3:
+                    break
+                elif user_input == 4:
+                    break
+                elif user_input == 5:
+                    break
+                else:
+                    print('Invalid input!! Try again.')
+            except Exception:
                 print('Invalid input!! Try again.')
-        except Exception:
-            print('Invalid input!! Try again.')
 
 
 if __name__ == '__main__':
