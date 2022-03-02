@@ -1,4 +1,4 @@
-class Email_slicer:
+class EmailSlicer:
     def __init__(self, email):
         self._email = email
 
@@ -12,21 +12,19 @@ class Email_slicer:
         return self._email[self._email.index('@') + 1:]
 
 
-class Cli_handler:
-    def __init__(self, email):
-        self._email = email
-        self._email_slicer_obj = Email_slicer(email)
-
+class CliHandler:
     def start(self):
         while True:
-            if self._email_slicer_obj.is_valid_email():
+            email = input('Enter the email:')
+            email_slicer_obj = EmailSlicer(email)
+            if email_slicer_obj.is_valid_email():
                 print('Enter a valid email address.')
-                Cli_handler(input('Enter your email:')).start()
+                continue
             else:
                 print(
-                    f'Your username is {self._email_slicer_obj.username()} and domain name is {self._email_slicer_obj.domain_name()}')
+                    f'Your username is {email_slicer_obj.username()} and domain name is {email_slicer_obj.domain_name()}')
                 break
 
 
 if __name__ == '__main__':
-    Cli_handler(input('Enter your email:')).start()
+    CliHandler().start()
