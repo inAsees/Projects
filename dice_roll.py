@@ -10,10 +10,7 @@ class RollDice:
 
 
 class CliHandler:
-
-    def comp_choose(self) -> int:
-        return random.randint(1, 6)
-
+    
     def start(self):
         print('Press 1 to roll the dice.\nPress 2 if you want to quit this game.')
         while True:
