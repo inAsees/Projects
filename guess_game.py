@@ -35,6 +35,12 @@ class GuessGame:
     def is_user_guess_equal_random(self, user_input: int) -> bool:
         return self._random_number == user_input
 
+    def is_current_attempts_equal_max_attempts(self) -> bool:
+        return self._current_attempts == self._max_attempts
+
+    def is_last_attempt(self) -> bool:
+        return self._current_attempts == self._max_attempts
+
 
 class CliHandler:
     def __init__(self, upper_bound: int, max_attempts: int):
@@ -49,22 +55,33 @@ class CliHandler:
             except ValueError:
                 print('Invalid input, try again\n')
                 continue
-
+            self._game.increment_attempts()
             if self._game.is_user_guess_equal_random(user_guess):
                 print('Number {} found in {} attempt.'.format(self._game.get_random_number(),
-                                                              self._game.get_attempts_left()))
+                                                              self._game.get_current_attempts()))
                 break
 
             elif self._game.is_user_input_not_in_range(user_guess):
-                print('Entered number is out of range,please guess a number between 1 and {} again:'.format(
-                    self._game.get_upper_bound()))
+                print(
+                    'Entered number is out of range,please guess a number between 1 and {} again.\t You have {} attempts remaining.'.format(
+                        self._game.get_upper_bound(), self._game.get_attempts_left()))
             elif self._game.is_user_input_smaller(user_guess):
-                print('number is SMALL , guess BIGGER number again!')
-            else:
-                print('number is BIG , guess SMALLER number again!')
+                if self._game.is_last_attempt():
+                    print(
+                        f'Wrong answer!!\tYou are out of attempts.')
+                    break
+                print('number is SMALL , guess BIGGER number again!\t You have {} attempts remaining.'.format(
+                    self._game.get_attempts_left()))
 
-            self._game.increment_attempts()
+            else:
+
+                if self._game.is_last_attempt():
+                    print(
+                        f'Wrong answer!\tYou are out of attempts.')
+                    break
+                print('number is big , guess SMALLER number again!\t You have {} attempts remaining.'.format(
+                    self._game.get_attempts_left()))
 
 
 if __name__ == "__main__":
-    CliHandler(12, 3).start()
+    CliHandler(20, 3).start()
