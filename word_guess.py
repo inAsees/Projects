@@ -2,10 +2,10 @@ import random
 
 
 class WordGuess:
-    def __init__(self, current_attempt, correct_attempt, wrong_attempt, max_attempts):
-        self._current_attempt = current_attempt
-        self._correct_attempt = correct_attempt
-        self._wrong_attempt = wrong_attempt
+    def __init__(self, max_attempts: int):
+        self._current_attempt = 0
+        self._correct_attempt = 0
+        self._wrong_attempt = 0
         self._max_attempts = max_attempts
 
     def get_random_word(self) -> str:
@@ -68,7 +68,7 @@ class WordGuess:
 
 class CliHandler:
     def __init__(self, max_attempts):
-        self._word_guess = WordGuess(0, 0, 0, max_attempts)
+        self._word_guess = WordGuess(max_attempts)
 
     def start(self):
         print(
