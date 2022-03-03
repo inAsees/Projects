@@ -9,7 +9,7 @@ class WordGuess:
         self._max_attempts = max_attempts
 
     def get_random_word(self) -> str:
-        return random.choice(['dell'])
+        return random.choice(['hang', 'dare', 'truth', 'sky', 'peace', 'hello'])
 
     def get_current_attempt(self) -> int:
         return self._current_attempt
