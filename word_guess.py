@@ -9,7 +9,7 @@ class WordGuess:
         self._max_attempts = max_attempts
 
     def get_random_word(self) -> str:
-        return random.choice(['hang', 'dare', 'truth', 'sky', 'peace', 'hello'])
+        return random.choice(['dell'])
 
     def get_current_attempt(self) -> int:
         return self._current_attempt
@@ -25,6 +25,9 @@ class WordGuess:
 
     def increment_wrong_attempt(self) -> None:
         self._wrong_attempt += 1
+
+    def get_attempts_left(self) -> int:
+        return self._max_attempts - self._current_attempt
 
     def is_word_guessed_before_max_attempts_exhausts(self) -> bool:
         return self._correct_attempt == len(self.get_random_word())
@@ -77,24 +80,26 @@ class CliHandler:
                     'Press "1" for yes and "0" for continuing with letters instead.')
                 try:
                     user_input = int(input('Enter your response:'))
-                    if user_input == 1:
-                        word_input = input('Enter the word:').lower()
-                        self._word_guess.increment_current_attempt()
-                        if self._word_guess.is_user_guess_equals_random_word(word_input):
-                            print(f'You guessed the correct word in {self._word_guess._current_attempt} attempt.')
-                        else:
-                            print(
-                                f'Wrong guess. {self._word_guess._max_attempts - self._word_guess.get_current_attempt} attempt remaining.\nTry again')
-                            self._word_guess.increment_wrong_attempt()
-                            continue
-                    elif user_input == 0:
-                        pass
-                    else:
-                        print('Invalid input. Try again!')
-                        continue
                 except ValueError:
                     print('Invalid input! Try again')
                     continue
+                if user_input == 1:
+                    word_input = input('Enter the word:').lower()
+                    self._word_guess.increment_current_attempt()
+                    if self._word_guess.is_user_guess_equals_random_word(word_input):
+                        print(f'You guessed the correct word in {self._word_guess._current_attempt} attempt.')
+                        quit()
+                    else:
+                        print(
+                            f'Wrong guess. {self._word_guess.get_attempts_left()} attempt remaining.\nTry again.')
+                        self._word_guess.increment_wrong_attempt()
+                        continue
+                elif user_input == 0:
+                    pass
+                else:
+                    print('Invalid input. Try again!')
+                    continue
+
             letter_input = input('Enter the letter:').lower()
             if not self._word_guess.is_letter_input_alphabet(letter_input):
                 print('Invalid input!!\nPlease enter letter only!')
@@ -103,14 +108,15 @@ class CliHandler:
             if self._word_guess.is_user_guess_present_in_random_word(letter_input):
                 letter_index = self._word_guess.get_index_of_letter_in_list_of_random_word(letter_input)
                 print(
-                    f'You guessed the correct letter.Letter position is {letter_index + 1} in the word.\n'
-                    f'\t{self._max_attempts - self._word_guess.get_current_attempt} guess remaining!')
+                    f'You guessed the correct letter.Letter position is {letter_index + 1} in the word.\t'
+                    f'{self._word_guess.get_attempts_left()} attempt remaining!')
                 self._word_guess.pop_letter_index_for_multiple_occurence_of_letter(letter_index)
                 self._word_guess.insert_at_letter_index_for_multiple_occurence_of_letter(letter_index)
+                print(self._word_guess.make_list_of_random_word())
                 self._word_guess.increment_correct_attempt()
             else:
                 print(
-                    f'Wrong guess! {self._max_attempts - self._word_guess.get_current_attempt} guess remaining!\nTry again.')
+                    f'Wrong guess! {self._word_guess.get_attempts_left()} attempt remaining!\nTry again.')
                 self._word_guess.increment_wrong_attempt()
             if self._word_guess.hint_no_1():
                 print(f'\tHint for you. (Word has {len(self._word_guess.get_random_word())} letters.)')
