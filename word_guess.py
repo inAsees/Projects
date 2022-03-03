@@ -17,6 +17,9 @@ class WordGuess:
     def get_correct_attempt(self) -> int:
         return self._correct_attempt
 
+    def get_max_attempts(self) -> int:
+        return self._max_attempts
+
     def increment_current_attempt(self) -> None:
         self._current_attempt += 1
 
@@ -65,13 +68,12 @@ class WordGuess:
 
 class CliHandler:
     def __init__(self, max_attempts):
-        self._max_attempts = max_attempts
         self._word_guess = WordGuess(0, 0, 0, max_attempts)
 
     def start(self):
         print(
-            f'This is the Word guess game. You have only {self._max_attempts} guesses in total. Best of luck.')
-        while self._word_guess.get_current_attempt() < self._max_attempts:
+            f'This is the Word guess game. You have only {self._word_guess.get_max_attempts()} guesses in total. Best of luck.')
+        while self._word_guess.get_current_attempt() < self._word_guess.get_max_attempts():
             if self._word_guess.is_word_guessed_before_max_attempts_exhausts():
                 break
             if self._word_guess.guess_word_instead_of_letters():
