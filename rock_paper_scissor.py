@@ -2,110 +2,105 @@ import random
 
 
 class RpsGame:
-    def __init__(self):
-        self.max_attempts = 5
-        self.current_attempt = 0
+    def __init__(self, max_attempts):
+        self._current_attempt = 0
+        self._max_attempts = max_attempts
+        self._comp_choice = None
         self.user_score = 0
         self.comp_score = 0
 
-    def increment_current_attempt(self) -> None:
-        self.current_attempt += 1
-
-    def _increment_user_score(self) -> None:
+    def increment_user_score(self):
         self.user_score += 1
 
-    def _increment_comp_score(self) -> None:
+    def increment_comp_score(self):
         self.comp_score += 1
 
-    def is_choice_r_p_or_s(self, user_choice) -> str:
-        if user_choice == 1:
-            return "Rock"
-        elif user_choice == 2:
-            return "Paper"
-        else:
-            return "Scissor"
+    def is_attempts_left(self) -> bool:
+        return self._current_attempt < self._max_attempts
 
-    def _rps_logic(self, user_choice) -> int:
-        comp_choice = random.randint(1, 3)
+    def make_choice(self):
+        self._current_attempt += 1
+        self._comp_choice = random.choice(["1", "2", "3"])
 
-        if user_choice == comp_choice:
-            return -1
-        elif user_choice == 1:
-            if comp_choice == 2:
-                self._increment_comp_score()
-                return 3
-            else:
-                self._increment_user_score()
-                return 2
-        elif user_choice == 2:
-            if comp_choice == 3:
-                self._increment_comp_score()
-                return 5
-            else:
-                self._increment_user_score()
-                return 4
-        elif user_choice == 3:
-            if comp_choice == 1:
-                self._increment_comp_score()
-                return 7
-            else:
-                self._increment_user_score()
-                return 6
+    def get_comp_choice(self) -> str:
+        return self._comp_choice
 
-    def user_vs_comp(self, user_choice) -> bool or None:
-        if self._rps_logic(user_choice) < 0:
-            return None
-        elif self._rps_logic(user_choice) % 2 != 0:
-            return True
-        else:
-            return False
+    def get_result(self, user_input: str) -> str:
+        results_mapping = {
+            "1": {
+                "1": "DRAW",
+                "2": "LOSE",
+                "3": "WON",
+            },
+            "2": {
+                "1": "WON",
+                "2": ["DRAW"],
+                "3": "LOSE",
+            },
+            "3": {
+                "1": "LOSE",
+                "2": "WON",
+                "3": "DRAW"
+            }
+        }
+        if results_mapping[user_input][self._comp_choice] == "WON":
+            self.increment_user_score()
+        elif results_mapping[user_input][self._comp_choice] == "LOSE":
+            self.increment_comp_score()
+        return results_mapping[user_input][self._comp_choice]
 
-    def winner(self) -> bool:
+    def is_user_winner(self) -> str:
         if self.user_score > self.comp_score:
-            return True
+            return "WON"
         elif self.user_score < self.comp_score:
-            return False
+            return "LOSE"
+        else:
+            return "DRAW"
 
-    def draw(self) -> bool:
-        return self.user_score == self.comp_score
 
-
-class CliHAndler:
-    def __init__(self):
-        self.rps_game = RpsGame()
+class CliHandler:
+    def __init__(self, max_attempts: int):
+        self._max_attempts = max_attempts
+        self._rps_game = RpsGame(max_attempts)
 
     def start(self):
-        print(
-            f'This is Rock Paper Scissor game.\tThere are {self.rps_game.max_attempts} attempts.\nFor "Rock" press 1\nFor "Paper" press 2\nFor "Scissor" press 3')
-        while self.rps_game.current_attempt < self.rps_game.max_attempts:
-            try:
-                user_choice = int(input('Enter: '))
-            except ValueError:
-                print('Invalid response.')
-                continue
-            if user_choice < 1 or user_choice > 3:
-                print('Invalid response.')
-                continue
-            self.rps_game.increment_current_attempt()
-            print(self.rps_game.is_choice_r_p_or_s(user_choice))
-            if self.rps_game.user_vs_comp(user_choice) == None:
-                print('MATCH DRAW')
+        print(f'This is Rock Paper Scissor game.\tThere are {self._max_attempts} attempts.\n'
+              f'For "Rock" press 1\n'
+              f'For "Paper" press 2\n'
+              f'For "Scissor" press 3')
+
+        while self._rps_game.is_attempts_left():
+            user_choice = input('enter:')
+            if user_choice == "1":
+                self._rps_game.make_choice()
+                self._print_results("Rock", self._rps_game.get_comp_choice(), self._rps_game.get_result(user_choice))
+
+            elif user_choice == "2":
+                self._rps_game.make_choice()
+                self._print_results("Paper", self._rps_game.get_comp_choice(), self._rps_game.get_result(user_choice))
+
+            elif user_choice == "3":
+                self._rps_game.make_choice()
+                self._print_results("Scissors", self._rps_game.get_comp_choice(),
+                                    self._rps_game.get_result(user_choice))
+
+            else:
+                print('Invalid input')
                 continue
 
-            if self.rps_game.user_vs_comp(user_choice):
-                print('You won the MATCH')
-            else:
-                print("You loose the MATCH")
-        if self.rps_game.draw():
-            print(self.rps_game.user_score,self.rps_game.comp_score)
-            print('GAME DRAW')
-        if self.rps_game.winner():
-            print(self.rps_game.user_score, self.rps_game.comp_score)
-            print("You won the GAME")
-        else:
-            print(self.rps_game.user_score, self.rps_game.comp_score)
-            print("Comp won the GAME")
+        print(f"Final result of the game:\n"
+              f"You {self._rps_game.is_user_winner()} the game.")
+
+    def _print_results(self, user_choice: str, comp_choice_code: str, result: str):
+        choice_mapping = {
+            "1": "Rock",
+            "2": "Paper",
+            "3": "Scissors"
+        }
+        print(f'Your choice is: {user_choice}')
+        print(f'Computer choice is {choice_mapping[comp_choice_code]}')
+        print(f'You: {result}')
 
 
 if __name__ == "__main__":
-    CliHAndler().start()
+    CliHandler(5).start()
