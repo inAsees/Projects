@@ -9,10 +9,10 @@ class RpsGame:
         self.user_score = 0
         self.comp_score = 0
 
-    def increment_user_score(self):
+    def _increment_user_score(self):
         self.user_score += 1
 
-    def increment_comp_score(self):
+    def _increment_comp_score(self):
         self.comp_score += 1
 
     def is_attempts_left(self) -> bool:
@@ -34,7 +34,7 @@ class RpsGame:
             },
             "2": {
                 "1": "WON",
-                "2": ["DRAW"],
+                "2": "DRAW",
                 "3": "LOSE",
             },
             "3": {
@@ -44,9 +44,9 @@ class RpsGame:
             }
         }
         if results_mapping[user_input][self._comp_choice] == "WON":
-            self.increment_user_score()
+            self._increment_user_score()
         elif results_mapping[user_input][self._comp_choice] == "LOSE":
-            self.increment_comp_score()
+            self._increment_comp_score()
         return results_mapping[user_input][self._comp_choice]
 
     def is_user_winner(self) -> str:
@@ -89,7 +89,7 @@ class CliHandler:
                 continue
 
         print(f"Final result of the game:\n"
-              f"You {self._rps_game.is_user_winner()} the game.")
+              f"You {self._rps_game.is_user_winner()} ")
 
     def _print_results(self, user_choice: str, comp_choice_code: str, result: str):
         choice_mapping = {
