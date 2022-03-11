@@ -9,20 +9,12 @@ class RpsGame:
         self.user_score = 0
         self.comp_score = 0
 
-    def _increment_user_score(self):
-        self.user_score += 1
-
-    def _increment_comp_score(self):
-        self.comp_score += 1
-
     def is_attempts_left(self) -> bool:
         return self._current_attempt < self._max_attempts
 
-    def make_choice(self):
+    def get_comp_choice(self) -> str:
         self._current_attempt += 1
         self._comp_choice = random.choice(["1", "2", "3"])
-
-    def get_comp_choice(self) -> str:
         return self._comp_choice
 
     def get_result(self, user_input: str) -> str:
@@ -49,13 +41,19 @@ class RpsGame:
             self._increment_comp_score()
         return results_mapping[user_input][self._comp_choice]
 
-    def is_user_winner(self) -> str:
+    def get_user_status(self) -> str:
         if self.user_score > self.comp_score:
             return "WON"
         elif self.user_score < self.comp_score:
             return "LOSE"
         else:
             return "DRAW"
+
+    def _increment_user_score(self):
+        self.user_score += 1
+
+    def _increment_comp_score(self):
+        self.comp_score += 1
 
 
 class CliHandler:
@@ -72,15 +70,12 @@ class CliHandler:
         while self._rps_game.is_attempts_left():
             user_choice = input('enter:')
             if user_choice == "1":
-                self._rps_game.make_choice()
                 self._print_results("Rock", self._rps_game.get_comp_choice(), self._rps_game.get_result(user_choice))
 
             elif user_choice == "2":
-                self._rps_game.make_choice()
                 self._print_results("Paper", self._rps_game.get_comp_choice(), self._rps_game.get_result(user_choice))
 
             elif user_choice == "3":
-                self._rps_game.make_choice()
                 self._print_results("Scissors", self._rps_game.get_comp_choice(),
                                     self._rps_game.get_result(user_choice))
 
@@ -89,7 +84,7 @@ class CliHandler:
                 continue
 
         print(f"Final result of the game:\n"
-              f"You {self._rps_game.is_user_winner()} ")
+              f"You {self._rps_game.get_user_status()} ")
 
     def _print_results(self, user_choice: str, comp_choice_code: str, result: str):
         choice_mapping = {
