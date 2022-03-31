@@ -14,7 +14,7 @@ class PasswordGenerator:
 
     def generate_password(self) -> str:
         lst = []
-        for word in self._words_repository:
+        for word in self._get_words_repository():
             for char in word:
                 lst.append(char)
         password = random.sample(lst, k=len(lst))
