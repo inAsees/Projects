@@ -1,4 +1,5 @@
 import random
+import string
 
 
 class PasswordGenerator:
@@ -6,13 +7,19 @@ class PasswordGenerator:
         self._minimum_length = 4
 
     def generate_password(self, password_length: int) -> str:
+        password = ""
         if password_length != 0:
-            pass
+            for i in range(password_length):
+                password += random.choice(string.ascii_letters + string.punctuation + string.digits)
+            return password
+
         else:
             password_length = random.randint(self._minimum_length, 12)
-            pass
+            for i in range(password_length):
+                password += random.choice(string.ascii_letters + string.punctuation + string.digits)
+            return password
 
-    def get_minmum_length(self)->int:
+    def get_minmum_length(self) -> int:
         return self._minimum_length
 
 
@@ -40,12 +47,12 @@ class CliHandler:
                     if password_length < password_gen.get_minmum_length():
                         print(f"This is less than {password_gen.get_minmum_length()},try again.")
                         continue
-                    password_gen.generate_password(password_length)
+                    print(f"Password is: {password_gen.generate_password(password_length)}")
                     break
                 break
 
             elif user_input == "2":
-                password_gen.generate_password(password_length=0)
+                print(f"Password is: {password_gen.generate_password(password_length=0)}")
                 break
             else:
                 print("Invalid input")
