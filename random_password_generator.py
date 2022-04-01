@@ -3,40 +3,53 @@ import random
 
 class PasswordGenerator:
     def __init__(self):
-        self._words_repository = []
+        self._minimum_length = 4
 
-    def update_words_repository(self, word_input: str) -> None:
-        self._words_repository.append(word_input)
+    def generate_password(self, password_length: int) -> str:
+        if password_length != 0:
+            pass
+        else:
+            password_length = random.randint(self._minimum_length, 12)
+            pass
 
-    def save_words_repository_in_file(self, password_usage: str) -> None:
-        with open(f"password_hint_for_{password_usage}.txt", 'w') as f:
-            f.write(f"Words used to create the password are: {self._get_words_repository()}")
-
-    def generate_password(self) -> str:
-        lst = []
-        for word in self._get_words_repository():
-            for char in word:
-                lst.append(char)
-        password = random.sample(lst, k=len(lst))
-        return "".join(password)
-
-    def _get_words_repository(self) -> list[str]:
-        return self._words_repository
+    def get_minmum_length(self)->int:
+        return self._minimum_length
 
 
 class CliHandler:
 
     def start(self):
         password_gen = PasswordGenerator()
-        password_usage = input("Password generator app.Where are you going to use this password?\n")
-        print("Your provided words will be used to create a password."
-              "How many words would you like to provide?")
-        words_count = int(input("enter:"))
-        for _ in range(words_count):
-            word_input = input("enter your word:")
-            password_gen.update_words_repository(word_input)
-        print(f"Generated password is : {password_gen.generate_password()}")
-        password_gen.save_words_repository_in_file(password_usage)
+        password_usage = input("Password Generator Application.\n"
+                               "Where are you going to use this password? "
+                               "Example:Facebook,Instagram etc.\n")
+        while True:
+            user_input = input(
+                f"Do you want to provide maximum length for the password?\n"
+                f"Make sure to provide minimum length of {password_gen.get_minmum_length()} characters.\n"
+                "If YES press '1'.\n"
+                "If NO press '2'.\n")
+            if user_input == "1":
+                while True:
+                    try:
+                        password_length = int(input("Please provide the maximum length of the password:"))
+                    except ValueError as e:
+                        print("Invalid input")
+                        continue
+
+                    if password_length < password_gen.get_minmum_length():
+                        print(f"This is less than {password_gen.get_minmum_length()},try again.")
+                        continue
+                    password_gen.generate_password(password_length)
+                    break
+                break
+
+            elif user_input == "2":
+                password_gen.generate_password(password_length=0)
+                break
+            else:
+                print("Invalid input")
+                continue
 
 
 if __name__ == "__main__":
