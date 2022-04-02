@@ -24,11 +24,11 @@ class PasswordGenerator:
         return password
 
     def save(self) -> None:
-        # serialization
         with open(r"C:\Users\DELL\Desktop\my_passwords_repository\passwords_list.csv", "w", newline="") as f:
-            writer = csv.writer(f)
+            writer = csv.DictWriter(f, fieldnames=["domain", "password"])
+            writer.writeheader()
             for domain in self._dic:
-                writer.writerow([domain, self._dic[domain]])
+                writer.writerow({"domain": domain, "password": self._dic[domain]})
 
     def get_minimum_length(self) -> int:
         return self._minimum_length
@@ -41,9 +41,9 @@ class PasswordGenerator:
             return dic
 
         with open(r"C:\Users\DELL\Desktop\my_passwords_repository\passwords_list.csv", "r") as f:
-            reader = csv.reader(f)
+            reader = csv.DictReader(f)
             for rows in reader:
-                dic[rows[0]] = rows[1]
+                dic[rows["domain"]] = rows["password"]
 
         return dic
 
