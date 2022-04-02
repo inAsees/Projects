@@ -1,28 +1,31 @@
+import pickle
 import random
 import string
 import os
 import csv
+from typing import Dict
 
 
 class PasswordGenerator:
     def __init__(self):
-        self._create_directory()
-        self._load_from_file()
-        self._dic = {}
+        self._create_directory_if_not_exists()
+        self._dic = self._load_from_file()
         self._minimum_length = 4
 
     def generate_password(self, password_usage: str, password_length: int) -> str:
         password = ""
+
         if password_length == 0:
             password_length = 12
         for i in range(password_length):
             password += random.choice(string.ascii_letters + string.punctuation + string.digits)
+
         self._dic[password_usage] = password
         return password
 
     def save(self) -> None:
-        with open(r"C:\Users\DELL\Desktop\my_passwords_repository\passwords_list.csv",
-                  "w", newline="") as f:
+        # serialization
+        with open(r"C:\Users\DELL\Desktop\my_passwords_repository\passwords_list.csv", "w", newline="") as f:
             writer = csv.writer(f)
             for domain in self._dic:
                 writer.writerow([domain, self._dic[domain]])
@@ -30,20 +33,24 @@ class PasswordGenerator:
     def get_minimum_length(self) -> int:
         return self._minimum_length
 
-    def _load_from_file(self) -> None:
-        with open(r"C:\Users\DELL\Desktop\my_passwords_repository\passwords_list.csv",
-                  "r") as f:
+    @staticmethod
+    def _load_from_file() -> Dict:
+        dic = {}
+
+        if not os.path.exists(r"C:\Users\DELL\Desktop\my_passwords_repository\passwords_list.csv"):
+            return dic
+
+        with open(r"C:\Users\DELL\Desktop\my_passwords_repository\passwords_list.csv", "r") as f:
             reader = csv.reader(f)
             for rows in reader:
-                self._dic[rows[0]] = rows[1]
+                dic[rows[0]] = rows[1]
 
-    def _create_directory(self) -> None:
+        return dic
+
+    @staticmethod
+    def _create_directory_if_not_exists() -> None:
         if "my_passwords_repository" not in os.listdir(r'C:\Users\DELL\Desktop'):
             os.mkdir(r"C:\Users\DELL\Desktop\my_passwords_repository")
-            with open(r"C:\Users\DELL\Desktop\my_passwords_repository\passwords_list.csv",
-                      "w", newline="") as f:
-                writer = csv.writer(f)
-                writer.writerow(["Domain Name", "Password"])
 
 
 class CliHandler:
