@@ -1,4 +1,3 @@
-import pickle
 import random
 import string
 import os
@@ -14,14 +13,11 @@ class PasswordGenerator:
 
     def generate_password(self, password_usage: str, password_length: int) -> str:
         password = ""
-
         if password_length == 0:
             password_length = 12
-        for i in range(password_length):
-            password += random.choice(string.ascii_letters + string.punctuation + string.digits)
-
-        self._dic[password_usage] = password
-        return password
+        password = random.sample(string.ascii_letters + string.punctuation + string.digits, k=password_length)
+        self._dic[password_usage] = "".join(password)
+        return "".join(password)
 
     def save(self) -> None:
         with open(r"C:\Users\DELL\Desktop\my_passwords_repository\passwords_list.csv", "w", newline="") as f:
