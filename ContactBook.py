@@ -1,48 +1,52 @@
 import os
-import csv
 import pandas as pd
 
 
 class ContactBook:
     def __init__(self):
-        self.create_contact_book()
+        self.create_contact_book_if_not_exists()
+        self._df = self.load_from_file()
 
     @staticmethod
-    def create_contact_book():
+    def create_contact_book_if_not_exists() -> None:
         if 'contact_book.csv' not in os.listdir(os.getcwd()):
-            with open('contact_book.csv', 'w') as f:
-                header = csv.DictWriter(f, fieldnames=["Name", "Contact number", "Email Id", "Address"])
-                header.writeheader()
+            df = pd.DataFrame(columns=["Name", "Contact_number", "Email_Id", "Address"])
+            df.to_csv(r"C:\Users\DELL\PycharmProjects\TestProject\Beginner projects in Python\contact_book.csv",
+                      index=False)
 
     @staticmethod
-    def add_contact(name, contact_number, email_id, address) -> None:
-        df = pd.DataFrame([[name, contact_number, email_id, address]])
-        df.to_csv(r"C:\Users\DELL\PycharmProjects\TestProject\Beginner projects in Python\contact_book.csv", mode='a',
-                  header=False, index=False)
+    def load_from_file() -> pd.DataFrame:
+        df = pd.read_csv(r"C:\Users\DELL\PycharmProjects\TestProject\Beginner projects in Python\contact_book.csv")
+        return df
 
-    @staticmethod
-    def edit_contact(name):
+    def is_name_in_contact_book(self, name) -> bool:
+        return name in list(self._df.Name)
+
+    def add_contact(self, name, contact_number, email_id, address) -> None:
+        df = {
+            "Name": name,
+            "Contact_number": contact_number,
+            "Email_Id": email_id,
+            "Address": address
+        }
+        new_df = self._df.append(df, ignore_index=True)
+        new_df.to_csv(r"C:\Users\DELL\PycharmProjects\TestProject\Beginner projects in Python\contact_book.csv",
+                      index=False)
+
+    def edit_contact(self, name) -> None:
         pass
 
-    def delete_contact(self, user_input):
-        with open('contact_book.csv', 'rb+') as f:
-            pass
+    def delete_contact(self, name) -> None:
+        pass
 
-    @staticmethod
-    def search_contact(name) -> list:
-        df = pd.read_csv(r"C:\Users\DELL\PycharmProjects\TestProject\Beginner projects in Python\contact_book.csv")
-        arr = df.values
-        for row in arr:
+    def search_contact(self, name):
+        for row in list(self._df.values):
             if row[0] == name:
                 return row
 
-    def display_contact_book(self):
-        pass
-
     @staticmethod
-    def is_name_in_contact_book(name) -> bool:
-        df = pd.read_csv(r"C:\Users\DELL\PycharmProjects\TestProject\Beginner projects in Python\contact_book.csv")
-        return name in list(df.Name)
+    def display_contact_book() -> None:
+        pass
 
 
 class CliHandler:
@@ -71,19 +75,21 @@ class CliHandler:
                 self._contact_book.add_contact(name, contact_number, email_id, address)
                 print('You contact has been successfully created.')
                 break
-
-            elif user_input == 2:
+            elif user_input == 2: 
                 name = input('Name:')
-                if self._contact_book.is_name_in_contact_book(name):
-                    contact = self._contact_book.search_contact(name)
-                    print(f"Name:{contact[0]}\n"
-                          f"Contact Number:{contact[1]}\n"
-                          f"Email Id:{contact[2]}\n"
-                          f"Address:{contact[3]}")
-                    pass
-                    break
-                print("Name does not exist")
-                continue
+                if not self._contact_book.is_name_in_contact_book(name):
+                    print("Name does not exist")
+                    continue
+                contact = self._contact_book.search_contact(name)
+                print(f"Name:{contact[0]}\n"
+                      f"Contact Number:{contact[1]}\n"
+                      f"Email Id:{contact[2]}\n"
+                      f"Address:{contact[3]}")
+                name = input('Name:')
+                contact_number = input('New Mobile number:')
+                email_id = input('New Email Id:')
+                address = input('New Address:')
+                break
             elif user_input == 3:
                 name = input('Name:')
                 if self._contact_book.is_name_in_contact_book(name):
@@ -93,17 +99,21 @@ class CliHandler:
                 continue
             elif user_input == 4:
                 name = input('Enter the name:').lower()
-                if self._contact_book.is_name_in_contact_book(name):
-                    contact = self._contact_book.search_contact(name)
-                    print(f"Name:{contact[0]}\n"
-                          f"Contact Number:{contact[1]}\n"
-                          f"Email Id:{contact[2]}\n"
-                          f"Address:{contact[3]}")
-                    break
-                print("Name does not exist")
-                continue
-            elif user_input == 5:
+                if not self._contact_book.is_name_in_contact_book(name):
+                    print("Name does not exist")
+                    continue
+                contact = self._contact_book.search_contact(name)
+                print(f"Name:{contact[0]}\n"
+                      f"Contact Number:{contact[1]}\n"
+                      f"Email Id:{contact[2]}\n"
+                      f"Address:{contact[3]}")
                 break
+            elif user_input == 5:
+                pass
+                break
+            else:
+                print("Invalid input")
+                continue
 
 
 if __name__ == '__main__':
