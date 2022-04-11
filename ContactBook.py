@@ -37,7 +37,9 @@ class ContactBook:
         pass
 
     def delete_contact(self, name) -> None:
-        pass
+        df = self._df.loc[self._df["Name"] != name]
+        df.to_csv(r"C:\Users\DELL\PycharmProjects\TestProject\Beginner projects in Python\contact_book.csv",
+                  index=False)
 
     def search_contact(self, name):
         for row in list(self._df.values):
@@ -75,7 +77,7 @@ class CliHandler:
                 self._contact_book.add_contact(name, contact_number, email_id, address)
                 print('You contact has been successfully created.')
                 break
-            elif user_input == 2: 
+            elif user_input == 2:
                 name = input('Name:')
                 if not self._contact_book.is_name_in_contact_book(name):
                     print("Name does not exist")
@@ -92,11 +94,12 @@ class CliHandler:
                 break
             elif user_input == 3:
                 name = input('Name:')
-                if self._contact_book.is_name_in_contact_book(name):
-                    pass
-                    break
-                print("Name does not exist")
-                continue
+                if not self._contact_book.is_name_in_contact_book(name):
+                    print("Name does not exist")
+                    continue
+                self._contact_book.delete_contact(name)
+                print("Contact deleted successfully.")
+                break
             elif user_input == 4:
                 name = input('Enter the name:').lower()
                 if not self._contact_book.is_name_in_contact_book(name):
@@ -108,6 +111,9 @@ class CliHandler:
                       f"Email Id:{contact[2]}\n"
                       f"Address:{contact[3]}")
                 break
+
+
+
             elif user_input == 5:
                 pass
                 break
