@@ -1,59 +1,71 @@
 import os
+from typing import List, Dict, Optional
+
 import pandas as pd
 
 
 class ContactBook:
-    def __init__(self):
-        self.create_contact_book_if_not_exists()
+    def __init__(self, resource_file_path: str):
+        self._res_file_path = resource_file_path
         self._df = self.load_from_file()
 
-    @staticmethod
-    def create_contact_book_if_not_exists() -> None:
-        if 'contact_book.csv' not in os.listdir(os.getcwd()):
-            df = pd.DataFrame(columns=["Name", "Contact_number", "Email_Id", "Address"])
-            df.to_csv(r"C:\Users\DELL\PycharmProjects\TestProject\Beginner projects in Python\contact_book.csv",
-                      index=False)
+    def load_from_file(self) -> pd.DataFrame:
+        if os.path.exists(self._res_file_path):
+            return pd.read_csv(self._res_file_path)
 
-    @staticmethod
-    def load_from_file() -> pd.DataFrame:
-        df = pd.read_csv(r"C:\Users\DELL\PycharmProjects\TestProject\Beginner projects in Python\contact_book.csv")
-        return df
+        return pd.DataFrame(columns=["name", "contact_number", "email_id", "address"])
 
-    def is_name_in_contact_book(self, name) -> bool:
-        return name in list(self._df.Name)
-
-    def add_contact(self, name, contact_number, email_id, address) -> None:
-        df = {
-            "Name": name,
-            "Contact_number": contact_number,
-            "Email_Id": email_id,
-            "Address": address
+    def add_contact(self, name: str, contact_number: int, email_id: str, address: str) -> None:
+        row = {
+            "name": name,
+            "contact_number": contact_number,
+            "email_id": email_id,
+            "address": address
         }
-        new_df = self._df.append(df, ignore_index=True)
-        new_df.to_csv(r"C:\Users\DELL\PycharmProjects\TestProject\Beginner projects in Python\contact_book.csv",
-                      index=False)
+        self._df = self._df.append(row, ignore_index=True)
+        self._df.to_csv(self._res_file_path, index=False)
 
-    def edit_contact(self, name) -> None:
-        pass
+    def edit_contact(self, name: str, new_name: Optional[str], new_phone: Optional[int], new_email: Optional[str],
+                     new_address: Optional[str]) -> None:
+        idx = self._df.loc[self._df.name == name].index
+        if len(idx) == 0:
+            return
 
-    def delete_contact(self, name) -> None:
-        df = self._df.loc[self._df["Name"] != name]
-        df.to_csv(r"C:\Users\DELL\PycharmProjects\TestProject\Beginner projects in Python\contact_book.csv",
-                  index=False)
+        idx = idx[0]
+        if new_name is not None:
+            self._df.loc[idx, "name"] = new_name
+        if new_phone is not None:
+            self._df.loc[idx, "contact_number"] = new_phone
+        if new_email is not None:
+            self._df.loc[idx, "email_id"] = new_email
+        if new_address is not None:
+            self._df.loc[idx, "address"] = new_address
 
-    def search_contact(self, name):
-        for row in list(self._df.values):
-            if row[0] == name:
-                return row
+        self._df.to_csv(self._res_file_path, index=False)
 
-    @staticmethod
-    def display_contact_book() -> None:
-        pass
+    def delete_contact(self, name: str) -> None:
+        self._df.drop(self._df[self._df.name == name].index, inplace=True)
+        self._df.to_csv(self._res_file_path, index=False)
+
+    def search_contact(self, name: str) -> List[Dict]:
+        res = []
+        df = self._df[self._df.name == name]
+        for _, row in df.iterrows():
+            res.append(dict(row))
+        return res
+
+    def display_contact_book(self) -> List[Dict]:
+        res = []
+        for _, row in self._df.iterrows():
+            res.append({"name": row["name"], "address": row["address"]})
+
+        return res
 
 
 class CliHandler:
     def __init__(self):
-        self._contact_book = ContactBook()
+        self._contact_book = ContactBook(
+            r"C:\Users\DELL\PycharmProjects\TestProject\Beginner projects in Python\contact_book.csv")
 
     def start(self):
 
