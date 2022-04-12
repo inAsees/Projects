@@ -57,6 +57,7 @@ class ContactBook:
 
     def display_contact_book(self) -> List[Dict]:
         res = []
+        self._df = self._df.sort_values("name")
         for _, row in self._df.iterrows():
             res.append(dict(row))
 
@@ -70,7 +71,7 @@ class CliHandler:
 
     @staticmethod
     def _if_user_wants_to_edit_contact() -> bool:
-        response = input("If YES press '1' or '2' if NO:")
+        response = input("If YES press '1' or '2' if NO:\n")
         if response == "1":
             return True
         elif response == "2":
@@ -166,3 +167,6 @@ class CliHandler:
 
 if __name__ == '__main__':
     CliHandler().start()
+  
+
+
