@@ -8,7 +8,7 @@ class CliHandler:
 
     @staticmethod
     def _if_user_wants_to_edit_contact() -> bool:
-        response = input("If YES press '1' or '2' if NO:")
+        response = input("If YES press '1' or '2' if NO:\n")
         if response == "1":
             return True
         elif response == "2":
