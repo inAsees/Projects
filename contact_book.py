@@ -1,16 +1,12 @@
+import pandas as pd
 import os
 from typing import List, Dict, Optional
-
-import pandas as pd
 
 
 class ContactBook:
     def __init__(self, resource_file_path: str):
         self._res_file_path = resource_file_path
         self._df = self._load_from_file()
-
-    def is_name_in_contact_book(self, name: str) -> bool:
-        return name in self._df["name"].values
 
     def add_contact(self, name: str, contact_number: str, email_id: str, address: str) -> None:
         row = {
@@ -51,10 +47,14 @@ class ContactBook:
 
     def display_contact_book(self) -> List[Dict]:
         res = []
+        self._df.sort_values("name", inplace=True)
         for _, row in self._df.iterrows():
             res.append(dict(row))
 
         return res
+
+    def is_name_in_contact_book(self, name: str) -> bool:
+        return name in self._df["name"].values
 
     def _load_from_file(self) -> pd.DataFrame:
         if os.path.exists(self._res_file_path):
