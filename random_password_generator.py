@@ -15,7 +15,7 @@ class PasswordGenerator:
         self._minimum_length = 4
 
     def is_password_already_exits(self, password_usage: str) -> bool:
-        return password_usage in self._dic:
+        return password_usage in self._dic
       
 
     def generate_password(self, password_usage: str, password_length: Optional[int]) -> str:
