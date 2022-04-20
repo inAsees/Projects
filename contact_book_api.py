@@ -1,8 +1,8 @@
 from flask import Flask, request
-from contact_book import ContactBook
+from contact_book_core import ContactBook
 
 app = Flask(__name__)
-contact_book = ContactBook(r"C:\Users\DELL\PycharmProjects\contact_book\contact_book.csv")
+contact_book = ContactBook(r"C:\Users\DELL\Desktop\test files\contact_book.csv")
 
 
 @app.route("/api/add_contact", methods=["POST"])
@@ -27,7 +27,7 @@ def edit_contact():
     try:
         contact_book.edit_contact(data["name"], data["new_name"], data["new_contact_number"], data["new_email_id"],
                                   data["new_address"])
-        return {"status": "Contact updated successfully"}
+        return {"status": "Contact updated successfully"},200
     except Exception:
         return {"error": "Some error occurred"}, 400
 
@@ -38,23 +38,22 @@ def delete_contact():
     if not contact_book.is_name_in_contact_book(data["name"]):
         return {"status": "Name does not exist."}, 400
     contact_book.delete_contact(data["name"])
-    return {"status": "Contact deleted successfully."}
+    return {"status": "Contact deleted successfully."},200
 
 
 @app.route('/api/search_contact', methods=["POST"])
 def search_contact():
     data = request.json
     if not contact_book.is_name_in_contact_book(data["name"]):
-        return {"status": "Name does not exists."}
+        return {"status": "Name does not exists."}, 400
     contact = contact_book.search_contact(data["name"])
-    return contact[0]
+    return contact[0],200
 
 
 @app.route('/api/display_contact_book', methods=["GET"])
 def display_contact_book():
     contact = contact_book.display_contact_book()
-    for row in contact:  # How to return all the elements of the list?
-        return row
+    return {"contacts": contact}
 
 
 if __name__ == '__main__':
