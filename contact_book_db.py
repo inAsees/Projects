@@ -53,7 +53,7 @@ class ContactBook:
 
     def display_contact_book(self) -> Optional[list[tuple]]:
         cur = self._connection.cursor(buffered=True)
-        cur.execute("SELECT * FROM contact_book.contacts")
+        cur.execute("SELECT * FROM contact_book.contacts ORDER BY name")
         contacts_list = cur.fetchall()
         if len(contacts_list) == 0:
             return None
