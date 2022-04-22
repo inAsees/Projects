@@ -48,16 +48,24 @@ class ContactBook:
         if not self._is_name_in_contact_book(name):
             return True
         cur = self._connection.cursor(buffered=True)
-        cur.execute("DELETE FROM contact_book.contacts where name = %s", (name,))
+        cur.execute("DELETE FROM contact_book.contacts WHERE name = %s", (name,))
         self._connection.commit()
 
-    def display_contact_book(self) -> Optional[list[tuple]]:
+    def display_contact_book(self) -> Optional[list[dict]]:
+        res = []
         cur = self._connection.cursor(buffered=True)
         cur.execute("SELECT * FROM contact_book.contacts ORDER BY name")
         contacts_list = cur.fetchall()
         if len(contacts_list) == 0:
             return None
-        return contacts_list
+        for row in contacts_list:
+            res.append({
+                "name": row[1],
+                "contact number": row[2],
+                "email id": row[3],
+                "address": row[4]
+            })
+        return res
 
     def _is_name_in_contact_book(self, name: str) -> bool:
         cur = self._connection.cursor(buffered=True)
