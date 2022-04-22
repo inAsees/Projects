@@ -1,2 +1,2 @@
-# Programs
-Beginner python programs
+# Projects
+Beginner python projects
