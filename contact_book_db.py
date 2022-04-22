@@ -16,7 +16,7 @@ class ContactBook:
         cur.execute(query, val)
         self._connection.commit()
 
-    def search_contact(self, name: str) -> Optional[list]:
+    def search_contact(self, name: str) -> Optional[list[tuple]]:
         if not self._is_name_in_contact_book(name):
             return None
         cur = self._connection.cursor(buffered=True)
