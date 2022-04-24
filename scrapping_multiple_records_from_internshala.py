@@ -1,57 +1,69 @@
-from urllib.request import urlopen as u_req
+import csv
+from dataclasses import dataclass
+from typing import Dict, List
+
+import requests
+
 from bs4 import BeautifulSoup as bs
 from bs4.element import ResultSet
-import pandas as pd
-import os
+
+
+@dataclass
+class CompanyInfo:
+    name: str
+    job_title: str
+    stipend: float
+    duration: str
+    location: str
+    skill_set: List[str]
 
 
 class ScrapInternshala:
     def __init__(self):
-        self._df = self._load_from_file()
         self._base_url = "https://internshala.com"
-        self._page1_url = self._base_url + "/internships/keywords-python/page-1"
-        self._page2_url = self._base_url + "/internships/keywords-python/page-2"
-        self._page3_url = self._base_url + "/internships/keywords-python/page-3"
-        self._scrap_pages()
+        _python_intern_page = "internships/keywords-python"
+        self._python_internship_page_url = ["{}/{}/page-{}".format(self._base_url, _python_intern_page, i) for i in range(1, 4)]
+        self._company_info_list = []  # type: List[CompanyInfo]
 
-    def _scrap_pages(self) -> None:
-        internshala_url = self._page3_url
-        u_client = u_req(internshala_url)
-        internshala_page = u_client.read()
-        u_client.close()
-        internshala_html = bs(internshala_page, "html.parser")
-        companies_box = internshala_html.findAll("a", {"class": "view_detail_button"})
-        for idx in range(len(companies_box)):
-            details_url = self._base_url + companies_box[idx]["href"]
-            u_client = u_req(details_url)
-            page = u_client.read()
-            u_client.close()
-            page_html = bs(page, "html.parser")
-            company = page_html.find("a", {"class": "link_display_like_text"}).text.strip()
-            job = page_html.find("span", {"class": "profile_on_detail_page"}).text.strip()
-            stipend = self._get_stipend(page_html.find("span", {"class": "stipend"}).text)
-            duration = self._get_duration(page_html.findAll("div", {"class": "item_body"}))
-            location = page_html.find("a", {"class": "location_link"}).text.strip()
-            skill_set = None
-            try:
-                skill_set = page_html.find("div", {"class": "round_tabs_container"}).get_text().strip().split()
-            except AttributeError as e:
-                print(e)
-                pass
-            self._write_to_csv(company, job, stipend, duration, location, skill_set)
+    def scrap_all_pages(self) -> None:
+        for url in self._python_internship_page_url:
+            self._scrap_url(url)
+            break
 
-    def _write_to_csv(self, company: str, job: str, stipend: float, duration: str, location: str,
-                      skill_set: list) -> None:
-        row = {
-            "company": company,
-            "job": job,
-            "stipend": stipend,
-            "duration": duration,
-            "location": location,
-            "skill_set": skill_set
-        }
-        self._df = self._df.append(row, ignore_index=True)
-        self._df.to_csv(r"C:\Users\DELL\Desktop\test_files\scrap_internshala.csv", index=False)
+    def dump(self, file_path: str):
+        with open(file_path, "w") as f:
+            writer = csv.DictWriter(f, fieldnames=["name", "job_title", "stipend", "duration", "location", "skills"])
+            writer.writeheader()
+            for ele in self._company_info_list:
+                writer.writerow({"name": ele.name, "job_title": ele.job_title, "stipend": ele.stipend,
+                                 "duration": ele.duration, "location": ele.location, "skills": ele.skill_set})
+
+    def _scrap_url(self, url: str) -> None:
+        page_src = requests.get(url).text
+        page_soup = bs(page_src, "html.parser")
+        companies_box = page_soup.findAll("a", {"class": "view_detail_button"})
+        for company in companies_box:
+            details_url = self._base_url + company["href"]
+            company_details_src = requests.get(details_url).text
+            company_details_soup = bs(company_details_src, "html.parser")
+            company_info = self._parse_company_info(company_details_soup)
+            self._company_info_list.append(company_info)
+
+    @classmethod
+    def _parse_company_info(cls, company_soup) -> CompanyInfo:
+        company = company_soup.find("a", {"class": "link_display_like_text"}).text.strip()
+        job = company_soup.find("span", {"class": "profile_on_detail_page"}).text.strip()
+        stipend = cls._get_stipend(company_soup.find("span", {"class": "stipend"}).text)
+        duration = cls._get_duration(company_soup.findAll("div", {"class": "item_body"}))
+        location = company_soup.find("a", {"class": "location_link"}).text.strip()
+        skill_set = None
+        try:
+            skill_set = company_soup.find("div", {"class": "round_tabs_container"}).get_text().strip().split()
+        except AttributeError as e:
+            print(e)
+            pass
+
+        return CompanyInfo(company, job, stipend, duration, location, skill_set)
 
     @staticmethod
     def _get_stipend(raw_text: str) -> float:
@@ -79,13 +91,8 @@ class ScrapInternshala:
             if "Months" in duration.text or "Month" in duration.text:
                 return duration.text.strip()
 
-    @staticmethod
-    def _load_from_file() -> pd.DataFrame:
-        path = input("path:")
-        if os.path.exists(path):
-            return pd.read_csv(path)
-        return pd.DataFrame(columns=["company", "job", "stipend", "duration", "location", "skill_set"])
-
 
 if __name__ == "__main__":
-    scrap = ScrapInternshala()
+    scrapper = ScrapInternshala()
+    scrapper.scrap_all_pages()
+    scrapper.dump("")
