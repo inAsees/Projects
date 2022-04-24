@@ -34,7 +34,7 @@ class ScrapInternshala:
             page_no += 1
 
     def dump(self, file_path: str):
-        with open(file_path, "w", newline="") as f:
+        with open(file_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f,
                                     fieldnames=["company", "job_title", "stipend", "duration", "location", "skill_set"])
             writer.writeheader()
@@ -61,20 +61,31 @@ class ScrapInternshala:
     def _parse_company_info(cls, company_soup: bs) -> CompanyInfo:
         company = company_soup.find("a", {"class": "link_display_like_text"}).text.strip()
         job = company_soup.find("span", {"class": "profile_on_detail_page"}).text.strip()
-        stipend = cls._get_stipend(company_soup.find("span", {"class": "stipend"}).text)
+        incentive_if_any = company_soup.findAll("i")
+        stipend = cls._get_stipend(company_soup.find("span", {"class": "stipend"}).text, incentive_if_any)
         duration = cls._get_duration(company_soup.findAll("div", {"class": "item_body"}))
         location = company_soup.find("a", {"class": "location_link"}).text.strip()
         skill_set = None
         try:
             skill_set = company_soup.find("div", {"class": "round_tabs_container"}).get_text().strip().split()
         except AttributeError as e:
-            print(e)
             pass
 
         return CompanyInfo(company, job, stipend, duration, location, skill_set)
 
     @staticmethod
-    def _get_stipend(raw_text: str) -> str:
+    def _get_stipend(raw_text: str, incentive_if_any: ResultSet) -> str:
+        incentive = None
+        for i in incentive_if_any:
+            try:
+                text = i.get("popover_content")
+                if "starting" in text:
+                    continue
+                idx = text.index("(")
+                incentive = text[idx:]
+            except:
+                pass
+
         salary = "".join(raw_text.lstrip().split(" /month"))
         if len(salary) < 6:
             return salary
@@ -85,10 +96,10 @@ class ScrapInternshala:
                 return str(avg)
             elif " lump sum +  Incentives" in salary:
                 salary = "".join(salary.split(" lump sum +  Incentives"))
-                return salary + " plus incentives"
+                return salary + " + {}".format(incentive)
             elif " +  Incentives" in salary:
                 salary = "".join(salary.split(" +  Incentives"))
-                return salary + " plus incentives"
+                return salary + " + {}".format(incentive)
             elif " lump sum" in salary:
                 salary = "".join(salary.split(" lump sum"))
                 return salary
