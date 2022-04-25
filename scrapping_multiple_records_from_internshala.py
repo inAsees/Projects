@@ -10,7 +10,8 @@ from bs4.element import ResultSet
 class CompanyInfo:
     company: str
     job_title: str
-    stipend: str
+    lump_sum_per_month: int
+    incentive: str
     duration: str
     location: str
     skill_set: List[str]
@@ -36,12 +37,15 @@ class ScrapInternshala:
     def dump(self, file_path: str):
         with open(file_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f,
-                                    fieldnames=["company", "job_title", "stipend", "duration", "location", "skill_set"])
+                                    fieldnames=["company", "job_title", "lump_sum_per_month", "incentive", "duration",
+                                                "location", "skill_set"])
             writer.writeheader()
             print("Dumping begins....")
             for ele in self._company_info_list:
-                writer.writerow({"company": ele.company, "job_title": ele.job_title, "stipend": ele.stipend,
-                                 "duration": ele.duration, "location": ele.location, "skill_set": ele.skill_set})
+                writer.writerow(
+                    {"company": ele.company, "job_title": ele.job_title, "lump_sum_per_month": ele.lump_sum_per_month,
+                     "incentive": ele.incentive, "duration": ele.duration, "location": ele.location,
+                     "skill_set": ele.skill_set})
             print("Dumping finished....")
 
     def _scrap_url(self, url: str) -> None:
@@ -65,17 +69,17 @@ class ScrapInternshala:
         stipend = cls._get_stipend(company_soup.find("span", {"class": "stipend"}).text, incentive_if_any)
         duration = cls._get_duration(company_soup.findAll("div", {"class": "item_body"}))
         location = company_soup.find("a", {"class": "location_link"}).text.strip()
-        skill_set = None
+        skill_set = "Not mentioned"
         try:
             skill_set = company_soup.find("div", {"class": "round_tabs_container"}).get_text().strip().split()
         except AttributeError as e:
             pass
 
-        return CompanyInfo(company, job, stipend, duration, location, skill_set)
+        return CompanyInfo(company, job, stipend[0], stipend[1], duration, location, skill_set)
 
     @staticmethod
-    def _get_stipend(raw_text: str, incentive_if_any: ResultSet) -> str:
-        incentive = None
+    def _get_stipend(raw_text: str, incentive_if_any: ResultSet) -> tuple[int, str]:
+        incentive = "0"
         for i in incentive_if_any:
             try:
                 text = i.get("popover_content")
@@ -88,21 +92,31 @@ class ScrapInternshala:
 
         salary = "".join(raw_text.lstrip().split(" /month"))
         if len(salary) < 6:
-            return salary
+            return int(salary), "0"
         elif len(salary) > 5:
-            if "-" in salary:
+            if "-" in raw_text and " lump sum" in raw_text:
+                raw_salary = raw_text.split(" lump sum")
+                raw_salary = raw_salary[0].split("-")
+                avg = (int(raw_salary[0]) + int(raw_salary[1])) // 2
+                return int(avg), "0"
+            elif "-" in salary:
                 salary = list(map(int, salary.split("-")))
-                avg = (salary[0] + salary[1]) / 2
-                return str(avg)
+                avg = (salary[0] + salary[1]) // 2
+                return int(avg), "0"
+
             elif " lump sum +  Incentives" in salary:
                 salary = "".join(salary.split(" lump sum +  Incentives"))
-                return salary + " + {}".format(incentive)
+                return int(salary), incentive
             elif " +  Incentives" in salary:
                 salary = "".join(salary.split(" +  Incentives"))
-                return salary + " + {}".format(incentive)
+                return int(salary), incentive
             elif " lump sum" in salary:
                 salary = "".join(salary.split(" lump sum"))
-                return salary
+                return int(salary), "0"
+            else:
+                salary = 0
+                incentive = "0"
+                return salary, incentive
 
     @staticmethod
     def _get_duration(raw_text: ResultSet) -> str:
@@ -114,4 +128,4 @@ class ScrapInternshala:
 if __name__ == "__main__":
     scrapper = ScrapInternshala()
     scrapper.scrap_all_pages()
-    scrapper.dump(r"C:\Users\DELL\Desktop\test_files\internshala_scrapped.csv")
+    scrapper.dump(r"C:\Users\DELL\Desktop\test_files\test_scrap.csv")
