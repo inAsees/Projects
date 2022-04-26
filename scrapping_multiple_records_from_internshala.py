@@ -1,4 +1,5 @@
 import csv
+from csv import DictWriter
 from dataclasses import dataclass
 from typing import List
 import requests as req
@@ -43,7 +44,7 @@ class ScrapInternshala:
             writer.writeheader()
             self._write_file(writer)
 
-    def _write_file(self, writer) -> None:
+    def _write_file(self, writer: DictWriter) -> None:
         for ele in tqdm(self._company_info_list, desc="Dumping..."):
             writer.writerow(
                 {"job_title": ele.job_title,
