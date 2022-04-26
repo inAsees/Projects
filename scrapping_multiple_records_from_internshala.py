@@ -13,14 +13,14 @@ class CompanyInfo:
     company: str
     lump_sum_per_month: int
     incentive: str
-    duration: str
+    duration_in_days: int
     location: str
     apply_by: str
-    applicants: str
+    applicants: int
     number_of_openings: int
     skill_set: list[str]
     perks: list[str]
-    link: str
+    src_url: str
 
 
 class ScrapInternshala:
@@ -39,8 +39,9 @@ class ScrapInternshala:
         with open(file_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f,
                                     fieldnames=["job_title", "company", "lump_sum_per_month", "incentive",
-                                                "duration", "location", "apply_by", "applicants", "number_of_openings",
-                                                "skill_set", "perks", "link", ])
+                                                "duration_in_days", "location", "apply_by", "applicants",
+                                                "number_of_openings",
+                                                "skill_set", "perks", "src_url", ])
             writer.writeheader()
             for ele in tqdm(self._company_info_list, desc="Dumping..."):
                 writer.writerow(
@@ -48,14 +49,14 @@ class ScrapInternshala:
                      "company": ele.company,
                      "lump_sum_per_month": ele.lump_sum_per_month,
                      "incentive": ele.incentive,
-                     "duration": ele.duration,
+                     "duration_in_days": ele.duration,
                      "location": ele.location,
                      "apply_by": ele.apply_by,
                      "applicants": ele.applicants,
                      "number_of_openings": ele.number_of_openings,
                      "skill_set": ele.skill_set,
                      "perks": ele.perks,
-                     "link": ele.link})
+                     "src_url": ele.link})
 
     def _scrap_url(self, url: str) -> None:
         page_src = req.get(url).text
@@ -75,17 +76,26 @@ class ScrapInternshala:
         company = company_soup.find("a", {"class": "link_display_like_text"}).text.strip()
         stipend = cls._get_stipend(company_soup.find("span", {"class": "stipend"}).text)
         incentive = cls._get_incentive(company_soup.findAll("i"))
-        duration = cls._get_duration(company_soup.findAll("div", {"class": "item_body"}))
+        duration_in_days = cls._get_duration(company_soup.findAll("div", {"class": "item_body"}))
         location = company_soup.find("a", {"class": "location_link"}).text.strip()
         apply_by = cls._get_apply_by(company_soup.findAll("div", {"class": "item_body"}))
-        applicants = company_soup.find("div", {"class": "applications_message"}).text.strip()
+        applicants = cls._get_applicants(company_soup.find("div", {"class": "applications_message"}).text.strip())
         number_of_openings = cls._get_number_of_openings(company_soup.findAll("div", {"class": "text-container"}))
         skill_set = cls._get_skills_set(company_soup)
         perks = cls._get_perks(company_soup)
-        link = detail_url
+        src_url = detail_url
 
-        return CompanyInfo(job_title, company, stipend, incentive, duration, location, apply_by, applicants,
-                           number_of_openings, skill_set, perks, link)
+        print(duration_in_days, applicants, skill_set)
+
+        return CompanyInfo(job_title, company, stipend, incentive, duration_in_days, location, apply_by, applicants,
+                           number_of_openings, skill_set, perks, src_url)
+
+    @staticmethod
+    def _get_applicants(raw_text: str) -> int:
+        applicants = raw_text.split()
+        if len(applicants) == 2:
+            return int(applicants[0])
+        return 0
 
     @staticmethod
     def _get_perks(company_soup: bs) -> list[str]:
@@ -111,7 +121,7 @@ class ScrapInternshala:
                     if skill != "\n":
                         skill_set.append(skill.text)
                 return skill_set
-        return ["Not mentioned"]
+        return [""]
 
     @staticmethod
     def _get_number_of_openings(company_soup: ResultSet) -> int:
@@ -175,13 +185,14 @@ class ScrapInternshala:
                 return salary
 
     @staticmethod
-    def _get_duration(raw_text: ResultSet) -> str:
-        for duration in raw_text:
+    def _get_duration(company_result_set: ResultSet) -> int:
+        for duration in company_result_set:
             if "Months" in duration.text or "Month" in duration.text:
-                return duration.text.strip()
+                duration = duration.text.split()
+                return int(duration[0]) * 30
 
 
 if __name__ == "__main__":
     scrapper = ScrapInternshala()
     scrapper.scrap_all_pages()
-    # scrapper.dump(r"C:\Users\DELL\Desktop\scrap_key_python.csv")
+    scrapper.dump(r"C:\Users\DELL\Desktop\scrap_key_python.csv")
